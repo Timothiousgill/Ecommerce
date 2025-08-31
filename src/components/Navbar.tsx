@@ -40,7 +40,7 @@ const Navbar = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch categories from API
+
 useEffect(() => {
   const getCategories = async () => {
     try {
@@ -75,7 +75,7 @@ useEffect(() => {
       state: { category: categoryName }
     });
     if (open) {
-      onToggle(); // Close mobile menu if open
+      onToggle();
     }
   };
 

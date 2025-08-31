@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useDebounce } from "../components/hooks/useDebounce";
+
 import {
     Box,
     VStack,
@@ -26,23 +28,6 @@ interface FilterSidebarProps {
     priceRange: [number, number];
 }
 
-// Custom hook for debounced search
-const useDebounce = (value: string, delay: number) => {
-    const [debouncedValue, setDebouncedValue] = useState(value);
-
-    useEffect(() => {
-        const handler = setTimeout(() => {
-            setDebouncedValue(value);
-        }, delay);
-
-        return () => {
-            clearTimeout(handler);
-        };
-    }, [value, delay]);
-
-    return debouncedValue;
-};
-
 const FilterSidebar: React.FC<FilterSidebarProps> = ({
     filters,
     onFiltersChange,
@@ -54,7 +39,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
     const debouncedSearchQuery = useDebounce(localSearchQuery, 500);
     const isMobile = useBreakpointValue({ base: true, lg: false });
 
-    // Update filters when debounced search changes
+    // ✅ Fix: include filters + onFiltersChange in deps
     useEffect(() => {
         if (debouncedSearchQuery !== filters.searchQuery) {
             onFiltersChange({
@@ -62,7 +47,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
                 searchQuery: debouncedSearchQuery,
             });
         }
-    }, [debouncedSearchQuery, filters.searchQuery]);
+    }, [debouncedSearchQuery, filters, onFiltersChange]);
 
     const handleCategoryChange = (category: string, checked: boolean) => {
         const newCategories = checked
@@ -184,9 +169,6 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
                         <option value="name-a-z">Name: A to Z</option>
                     </select>
                 </Box>
-
-
-
             </Box>
 
             {/* Categories */}
@@ -236,7 +218,6 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
                             ${priceRange[1].toFixed(0)}
                         </Text>
                     </HStack>
-                    {/* Native HTML Range Input */}
                     <Box px={2}>
                         <input
                             type="range"
