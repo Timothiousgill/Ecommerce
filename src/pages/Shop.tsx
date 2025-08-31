@@ -20,7 +20,7 @@ import FilterSidebar, { type FilterState } from '../components/FilterSidebar';
 import ProductCard from '../components/ProductCard';
 import { fetchProducts, type Product } from '../api/productApi';
 
-const PRODUCTS_PER_PAGE = 8;
+const PRODUCTS_PER_PAGE = 8; // Adjusted for larger cards
 
 const Shop: React.FC = () => {
   const location = useLocation();
@@ -79,7 +79,7 @@ const Shop: React.FC = () => {
         ...prev,
         categories: [location.state.category],
       }));
-      // clear state so it doesn’t stick after reload
+      // clear state so it doesn't stick after reload
       navigate(location.pathname, { replace: true });
     }
   }, [location.state, navigate, location.pathname]);
@@ -193,21 +193,21 @@ const Shop: React.FC = () => {
               </Box>
             )}
             
-            {/* Products Grid Skeleton */}
+            {/* Products Grid Skeleton - Updated for larger cards */}
             <Box flex={1}>
               <Grid
                 templateColumns={{
                   base: "1fr",
                   md: "repeat(2, 1fr)",
-                  lg: "repeat(3, 1fr)",
-                  xl: "repeat(4, 1fr)",
+                  lg: "repeat(2, 1fr)",
+                  xl: "repeat(3, 1fr)",
                 }}
                 gap={6}
               >
                 {Array.from({ length: 8 }, (_, i) => (
                   <Box key={i} bg="white" p={4} borderRadius="xl" shadow="sm">
                     <VStack gap={3}>
-                      <Skeleton height="200px" />
+                      <Skeleton height="240px" />
                       <Skeleton height="20px" />
                       <Skeleton height="16px" />
                       <Skeleton height="40px" />
@@ -318,7 +318,7 @@ const Shop: React.FC = () => {
                 </HStack>
               </Flex>
 
-              {/* Products Grid */}
+              {/* Products Grid - Updated for larger cards with view button */}
               {currentProducts.length > 0 ? (
                 <Grid
                   templateColumns={
@@ -327,11 +327,11 @@ const Shop: React.FC = () => {
                       : {
                           base: "1fr",
                           md: "repeat(2, 1fr)",
-                          lg: isMobile ? "repeat(2, 1fr)" : "repeat(3, 1fr)",
-                          xl: isMobile ? "repeat(3, 1fr)" : "repeat(4, 1fr)",
+                          lg: isMobile ? "repeat(2, 1fr)" : "repeat(2, 1fr)",
+                          xl: isMobile ? "repeat(3, 1fr)" : "repeat(3, 1fr)",
                         }
                   }
-                  gap={6}
+                  gap={6} // Larger gap for bigger cards
                 >
                   {currentProducts.map((product) => (
                     <ProductCard key={product.id} product={product} />

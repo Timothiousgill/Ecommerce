@@ -11,7 +11,7 @@ import {
   AspectRatio,
   createToaster,
 } from '@chakra-ui/react';
-import { ShoppingCart, Check } from 'lucide-react';
+import { ShoppingCart, Check, Eye } from 'lucide-react';
 import { useCart } from '../components/hooks/useCart';
 
 // Product interface
@@ -42,6 +42,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+
   const { addToCart, getItemQuantity } = useCart();
 
   const cartQuantity = getItemQuantity(product.id);
@@ -94,7 +96,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   return (
     <Box
+      w="full"
+      maxW="400px" // Increased max width for larger cards
       borderWidth="1px"
+      borderColor="gray.200"
       borderRadius="xl"
       overflow="hidden"
       shadow="md"
@@ -109,50 +114,96 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       display="flex"
       flexDirection="column"
       position="relative"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Product Image */}
-      <AspectRatio ratio={1} mb={3}>
-        <Box>
-          {!imageLoaded && !imageError && <Skeleton w="full" h="full" />}
-          <Image
-            src={imageError ? defaultImage : product.image}
-            alt={product.title}
-            objectFit="cover"
-            w="full"
-            h="full"
-            onLoad={() => setImageLoaded(true)}
-            onError={() => {
-              setImageError(true);
-              setImageLoaded(true);
-            }}
-            display={imageLoaded ? 'block' : 'none'}
-          />
-        </Box>
-      </AspectRatio>
+      {/* Product Image Container */}
+      <Box position="relative" overflow="hidden">
+        <AspectRatio ratio={4/3} mb={0}>
+          <Box position="relative" w="full" h="full">
+            {!imageLoaded && !imageError && <Skeleton w="full" h="full" />}
+            <Image
+              src={imageError ? defaultImage : product.image}
+              alt={product.title}
+              objectFit="contain" // Changed from 'cover' to 'contain' to prevent zoom/cropping
+              objectPosition="center"
+              w="full"
+              h="full"
+              p={2} // Added padding to prevent image from touching edges
+              onLoad={() => setImageLoaded(true)}
+              onError={() => {
+                setImageError(true);
+                setImageLoaded(true);
+              }}
+              display={imageLoaded ? 'block' : 'none'}
+            />
+
+            {/* Hover Overlay with View Product Button */}
+            <Box
+              position="absolute"
+              top={0}
+              left={0}
+              right={0}
+              bottom={0}
+              bg="blackAlpha.400"
+              opacity={isHovered ? 1 : 0}
+              transition="opacity 0.3s ease"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <Button
+                size="md"
+                colorScheme="whiteAlpha"
+                variant="solid"
+                opacity={isHovered ? 1 : 0}
+                transform={isHovered ? "translateY(0)" : "translateY(20px)"}
+                transition="all 0.3s ease"
+                bg="white"
+                color="gray.800"
+                _hover={{ bg: "gray.100" }}
+                borderRadius="lg"
+                fontWeight="bold"
+              >
+                <HStack gap={2}>
+                  <Eye size={18} />
+                  <Text>View Product</Text>
+                </HStack>
+              </Button>
+            </Box>
+
+            {/* Category Badge */}
+            <Badge
+              position="absolute"
+              top={3}
+              left={3}
+              colorScheme="blue"
+              variant="solid"
+              fontSize="xs"
+              textTransform="capitalize"
+              fontWeight="bold"
+              px={3}
+              py={1}
+              borderRadius="full"
+            >
+              {product.category}
+            </Badge>
+          </Box>
+        </AspectRatio>
+      </Box>
 
       {/* Card Content */}
-      <VStack p={4} align="stretch" gap={3} flex={1}>
-        {/* Category */}
-        <Badge
-          colorScheme="blue"
-          variant="subtle"
-          alignSelf="flex-start"
-          fontSize="xs"
-          textTransform="capitalize"
-        >
-          {product.category}
-        </Badge>
-
+      <VStack p={5} align="stretch" gap={3} flex={1}>
         {/* Title */}
         <Text
-          fontSize="md"
+          fontSize="lg"
           fontWeight="semibold"
           lineHeight="short"
           color="gray.800"
           title={product.title}
-          minH="40px"
+          minH="48px" // Increased min height for larger cards
         >
-          {truncateTitle(product.title)}
+          {truncateTitle(product.title, 60)} {/* Increased character limit */}
         </Text>
 
         {/* Rating */}
@@ -173,13 +224,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         {/* Add to Cart Button */}
         <Button
           colorScheme="blue"
-          size="md"
+          size="lg" // Larger button for bigger cards
           mt="auto"
           onClick={handleAddToCart}
           disabled={isAdding}
           _hover={{ transform: 'scale(1.02)' }}
-          position="relative"
-          overflow="hidden"
+          borderRadius="lg"
+          fontWeight="bold"
+          h="48px" // Fixed height for consistency
         >
           <HStack gap={2}>
             {cartQuantity > 0 ? (
@@ -199,28 +251,17 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         {/* Quick Add More Button (if already in cart) */}
         {cartQuantity > 0 && (
           <Button
-            size="sm"
+            size="md"
             variant="outline"
             colorScheme="blue"
             onClick={handleAddToCart}
             disabled={isAdding}
+            borderRadius="lg"
           >
             Add Another
           </Button>
         )}
       </VStack>
-
-      {/* Discount Badge (optional) - uncomment to show */}
-      {/* <Badge
-        position="absolute"
-        top={2}
-        right={2}
-        colorScheme="red"
-        variant="solid"
-        fontSize="xs"
-      >
-        10% OFF
-      </Badge> */}
     </Box>
   );
 };

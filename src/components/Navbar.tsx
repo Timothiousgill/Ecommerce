@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { fetchCategories } from "../api/productApi";
+
 import {
   Box,
   Flex,
@@ -39,39 +41,33 @@ const Navbar = () => {
   const [loading, setLoading] = useState(true);
 
   // Fetch categories from API
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await fetch('https://fakestoreapi.com/products/categories');
-        const data = await response.json();
-        
-        // Transform categories to have display names
-        const transformedCategories: Category[] = data.map((category: string) => ({
-          name: category,
-          displayName: category
-            .split(' ')
-            .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ')
-            .replace(/'/g, '')
-        }));
-        
-        setCategories(transformedCategories);
-      } catch (error) {
-        console.error('Failed to fetch categories:', error);
-        // Fallback categories if API fails
-        setCategories([
-          { name: 'electronics', displayName: 'Electronics' },
-          { name: 'jewelery', displayName: 'Jewelry' },
-          { name: "men's clothing", displayName: 'Mens Clothing' },
-          { name: "women's clothing", displayName: 'Womens Clothing' },
-        ]);
-      } finally {
-        setLoading(false);
-      }
-    };
+useEffect(() => {
+  const getCategories = async () => {
+    try {
+      const data = await fetchCategories();
 
-    fetchCategories();
-  }, []);
+      const transformedCategories: Category[] = data.map((category: string) => ({
+        name: category,
+        displayName: category
+          .split(" ")
+          .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" ")
+          .replace(/'/g, ""),
+      }));
+
+      setCategories(transformedCategories);
+    } catch (error) {
+      console.error("Failed to fetch categories:", error);
+
+
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  getCategories();
+}, []);
+
 
   // Handle category selection
   const handleCategorySelect = (categoryName: string) => {
@@ -176,7 +172,7 @@ const Navbar = () => {
         Categories
         <Box
           as={ChevronDown}
-          boxSize={16}
+          boxSize={4}
           transform={dropdownOpen ? "rotate(180deg)" : "rotate(0deg)"}
           transition="transform 0.3s"
         />
