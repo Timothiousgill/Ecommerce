@@ -10,6 +10,7 @@ import {
   Link as ChakraLink,
   Badge,
   Text,
+  Button,
   type LinkProps as ChakraLinkProps,
 } from "@chakra-ui/react";
 import {
@@ -18,8 +19,11 @@ import {
   useLocation,
   useNavigate,
 } from "react-router-dom";
-import { ShoppingCart, ChevronDown } from "lucide-react";
+import { ShoppingCart, ChevronDown, User, LogIn } from "lucide-react";
 import { useCart } from '../components/hooks/useCart';
+import { useAuth } from '../components/hooks/useAuth';
+import { UserMenu } from './UserMenu';
+import { AuthModal } from './AuthModal';
 
 type NavLinkProps = Omit<ChakraLinkProps, "as" | "href"> & RouterLinkProps;
 
@@ -36,10 +40,11 @@ const Navbar = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { open, onToggle } = useDisclosure();
-  const { state } = useCart();
+  const { state: cartState } = useCart();
+  const { state: authState } = useAuth();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
-
+  const [authModalOpen, setAuthModalOpen] = useState(false);
 
   useEffect(() => {
     const getCategories = async () => {
@@ -58,8 +63,6 @@ const Navbar = () => {
         setCategories(transformedCategories);
       } catch (error) {
         console.error("Failed to fetch categories:", error);
-
-
       } finally {
         setLoading(false);
       }
@@ -68,7 +71,6 @@ const Navbar = () => {
     getCategories();
   }, []);
 
-
   // Handle category selection
   const handleCategorySelect = (categoryName: string) => {
     navigate('/shop', {
@@ -76,6 +78,15 @@ const Navbar = () => {
     });
     if (open) {
       onToggle();
+    }
+  };
+
+  // Handle auth button click
+  const handleAuthClick = () => {
+    if (authState.isAuthenticated) {
+      navigate('/profile');
+    } else {
+      setAuthModalOpen(true);
     }
   };
 
@@ -108,7 +119,7 @@ const Navbar = () => {
         {icon && <Box as="span">{icon}</Box>}
         {label}
         {/* Cart Badge */}
-        {showBadge && state.totalItems > 0 && (
+        {showBadge && cartState.totalItems > 0 && (
           <Badge
             position="absolute"
             top="-8px"
@@ -124,7 +135,7 @@ const Navbar = () => {
             justifyContent="center"
             fontWeight="bold"
           >
-            {state.totalItems > 99 ? '99+' : state.totalItems}
+            {cartState.totalItems > 99 ? '99+' : cartState.totalItems}
           </Badge>
         )}
       </NavLink>
@@ -307,212 +318,280 @@ const Navbar = () => {
   );
 
   return (
-    <Box
-      as="nav"
-      bg="#1C283C"
-      borderBottom="1px solid"
-      borderBottomColor="rgba(16, 185, 129, 0.2)"
-      boxShadow="0 25px 50px -12px rgba(0, 0, 0, 0.25)"
-      position="sticky"
-      top={0}
-      zIndex={50}
-    >
-      <Box maxW="7xl" mx="auto" px={6} py={4}>
-        <Flex align="center" justify="space-between">
-          {/* Logo */}
-          <NavLink
-            to="/"
-            fontSize="2xl"
-            fontWeight="bold"
-            color="#10B981"
-            _hover={{
-              textShadow: "2px 2px 4px rgba(0,0,0,0.5)",
-            }}
-            transition="all 0.3s"
-            textDecoration="none"
-            _focus={{ boxShadow: "none", outline: "none" }}
-          >
-            ILi Shop
-          </NavLink>
-
-          {/* Mobile Left Side: Hamburger + SVG */}
-          <HStack
-            gap={3}
-            display={{ base: "flex", md: "none" }}
-            align="center"
-            order={{ base: -1, md: "initial" }} // move to left only on mobile
-          >
-            {/* Hamburger Menu */}
-            <Box
-              as="button"
-              onClick={onToggle}
-              w="24px"
-              h="20px"
-              position="relative"
-              cursor="pointer"
-            >
-              <Box
-                as="span"
-                position="absolute"
-                top={0}
-                left={0}
-                h="2px"
-                w="100%"
-                bg="white"
-                borderRadius="md"
-                transform={open ? "rotate(45deg) translateY(9px)" : "none"}
-                transition="0.3s"
-              />
-              <Box
-                as="span"
-                position="absolute"
-                top="50%"
-                left={0}
-                h="2px"
-                w="100%"
-                bg="white"
-                borderRadius="md"
-                transform="translateY(-50%)"
-                opacity={open ? 0 : 1}
-                transition="0.3s"
-              />
-              <Box
-                as="span"
-                position="absolute"
-                bottom={0}
-                left={0}
-                h="2px"
-                w="100%"
-                bg="white"
-                borderRadius="md"
-                transform={open ? "rotate(-45deg) translateY(-9px)" : "none"}
-                transition="0.3s"
-              />
-            </Box>
-
-
-          </HStack>
-
-          {/* Desktop Navigation */}
-          <Box display={{ base: "none", md: "block" }}>
-            <HStack gap={2} alignItems="center">
-              {navLink("/", "Home")}
-              {navLink("/shop", "Shop")}
-              {categoriesDropdown()}
-              {navLink("/about", "About")}
-              {navLink("/contact", "Contact")}
-              {navLink(
-                "/cart",
-                "Cart",
-                <ShoppingCart size={20} />,
-                true
-              )}
-            </HStack>
-          </Box>
-          <Box display="flex" alignItems="center">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 200 200"
-              width="28"
-              height="28"
-              fill="currentColor"
-            >
-              <path d="M157 146.667V160a4 4 0 0 1-8 0v-13.333C149 134.168 138.906 124 126.5 124h-53C61.094 124 51 134.168 51 146.667V160a4 4 0 0 1-8 0v-13.333C43 129.757 56.683 116 73.5 116h53c16.817 0 30.5 13.757 30.5 30.667zm-87.5-80C69.5 49.757 83.183 36 100 36s30.5 13.757 30.5 30.667c0 16.909-13.683 30.666-30.5 30.666S69.5 83.576 69.5 66.667zm8 0c0 12.498 10.094 22.666 22.5 22.666s22.5-10.168 22.5-22.666C122.5 54.168 112.406 44 100 44S77.5 54.168 77.5 66.667z" />
-            </svg>
-          </Box>
-        </Flex>
-
-
-        {/* Mobile Menu */}
-        {open && (
-          <Box
-            position="fixed"
-            top={0}
-            left={0}
-            w="100vw"
-            h="100vh"
-            bg="#1C283C"
-            zIndex={49}
-          >
-            {/* Logo at top-left */}
+    <>
+      <Box
+        as="nav"
+        bg="#1C283C"
+        borderBottom="1px solid"
+        borderBottomColor="rgba(16, 185, 129, 0.2)"
+        boxShadow="0 25px 50px -12px rgba(0, 0, 0, 0.25)"
+        position="sticky"
+        top={0}
+        zIndex={50}
+      >
+        <Box maxW="7xl" mx="auto" px={6} py={4}>
+          <Flex align="center" justify="space-between">
+            {/* Logo */}
             <NavLink
               to="/"
               fontSize="2xl"
               fontWeight="bold"
               color="#10B981"
-              position="absolute"
-              top={6}
-              left={6}
-              _hover={{ textShadow: "2px 2px 4px rgba(0,0,0,0.5)" }}
+              _hover={{
+                textShadow: "2px 2px 4px rgba(0,0,0,0.5)",
+              }}
+              transition="all 0.3s"
               textDecoration="none"
               _focus={{ boxShadow: "none", outline: "none" }}
-              onClick={onToggle}
             >
               ILi Shop
             </NavLink>
 
-            {/* Close Button */}
-            <Box
-              position="absolute"
-              top={6}
-              right={6}
-              w="8"
-              h="8"
-              cursor="pointer"
-              onClick={onToggle}
+            {/* Mobile Left Side: Hamburger */}
+            <HStack
+              gap={3}
+              display={{ base: "flex", md: "none" }}
+              align="center"
+              order={{ base: -1, md: "initial" }}
             >
+              {/* Hamburger Menu */}
               <Box
-                position="absolute"
-                top="50%"
-                left="50%"
-                w="100%"
-                h="2px"
-                bg="white"
-                transform="translate(-50%, -50%) rotate(45deg)"
-              />
-              <Box
-                position="absolute"
-                top="50%"
-                left="50%"
-                w="100%"
-                h="2px"
-                bg="white"
-                transform="translate(-50%, -50%) rotate(-45deg)"
-              />
-            </Box>
+                as="button"
+                onClick={onToggle}
+                w="24px"
+                h="20px"
+                position="relative"
+                cursor="pointer"
+              >
+                <Box
+                  as="span"
+                  position="absolute"
+                  top={0}
+                  left={0}
+                  h="2px"
+                  w="100%"
+                  bg="white"
+                  borderRadius="md"
+                  transform={open ? "rotate(45deg) translateY(9px)" : "none"}
+                  transition="0.3s"
+                />
+                <Box
+                  as="span"
+                  position="absolute"
+                  top="50%"
+                  left={0}
+                  h="2px"
+                  w="100%"
+                  bg="white"
+                  borderRadius="md"
+                  transform="translateY(-50%)"
+                  opacity={open ? 0 : 1}
+                  transition="0.3s"
+                />
+                <Box
+                  as="span"
+                  position="absolute"
+                  bottom={0}
+                  left={0}
+                  h="2px"
+                  w="100%"
+                  bg="white"
+                  borderRadius="md"
+                  transform={open ? "rotate(-45deg) translateY(-9px)" : "none"}
+                  transition="0.3s"
+                />
+              </Box>
+            </HStack>
 
-            {/* Mobile Nav Links */}
-            <VStack h="100%" justify="center" alignItems="center" gap={6}>
-              <Box onClick={onToggle}>
+            {/* Desktop Navigation */}
+            <Box display={{ base: "none", md: "block" }}>
+              <HStack gap={2} alignItems="center">
                 {navLink("/", "Home")}
-              </Box>
-              <Box onClick={onToggle}>
                 {navLink("/shop", "Shop")}
-              </Box>
-
-              {/* Mobile Categories Section */}
-              {mobileCategoriesDropdown()}
-
-              <Box onClick={onToggle}>
+                {categoriesDropdown()}
                 {navLink("/about", "About")}
-              </Box>
-              <Box onClick={onToggle}>
                 {navLink("/contact", "Contact")}
-              </Box>
-              <Box onClick={onToggle}>
                 {navLink(
                   "/cart",
                   "Cart",
                   <ShoppingCart size={20} />,
                   true
                 )}
+              </HStack>
+            </Box>
+
+            {/* Authentication Section */}
+            <HStack gap={3} alignItems="center">
+              {authState.isAuthenticated ? (
+                <UserMenu />
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleAuthClick}
+                  _hover={{ bg: "rgba(16, 185, 129, 0.1)" }}
+                  _active={{ bg: "rgba(16, 185, 129, 0.2)" }}
+                  display={{ base: "none", md: "flex" }}
+                >
+                  <HStack gap={2}>
+                    <LogIn size={18} color="white" />
+                    <Text fontSize="sm" color="white">Sign In</Text>
+                  </HStack>
+                </Button>
+              )}
+
+              {/* Mobile User Icon */}
+              <Box display={{ base: "flex", md: "none" }} alignItems="center">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleAuthClick}
+                  p={2}
+                  _hover={{ bg: "rgba(16, 185, 129, 0.1)" }}
+                  _active={{ bg: "rgba(16, 185, 129, 0.2)" }}
+                >
+                  {authState.isAuthenticated ? (
+                    <User size={20} color="#10B981" />
+                  ) : (
+                    <LogIn size={20} color="white" />
+                  )}
+                </Button>
+              </Box>
+            </HStack>
+          </Flex>
+
+          {/* Mobile Menu */}
+          {open && (
+            <Box
+              position="fixed"
+              top={0}
+              left={0}
+              w="100vw"
+              h="100vh"
+              bg="#1C283C"
+              zIndex={49}
+            >
+              {/* Logo at top-left */}
+              <NavLink
+                to="/"
+                fontSize="2xl"
+                fontWeight="bold"
+                color="#10B981"
+                position="absolute"
+                top={6}
+                left={6}
+                _hover={{ textShadow: "2px 2px 4px rgba(0,0,0,0.5)" }}
+                textDecoration="none"
+                _focus={{ boxShadow: "none", outline: "none" }}
+                onClick={onToggle}
+              >
+                ILi Shop
+              </NavLink>
+
+              {/* Close Button */}
+              <Box
+                position="absolute"
+                top={6}
+                right={6}
+                w="8"
+                h="8"
+                cursor="pointer"
+                onClick={onToggle}
+              >
+                <Box
+                  position="absolute"
+                  top="50%"
+                  left="50%"
+                  w="100%"
+                  h="2px"
+                  bg="white"
+                  transform="translate(-50%, -50%) rotate(45deg)"
+                />
+                <Box
+                  position="absolute"
+                  top="50%"
+                  left="50%"
+                  w="100%"
+                  h="2px"
+                  bg="white"
+                  transform="translate(-50%, -50%) rotate(-45deg)"
+                />
               </Box>
 
-            </VStack>
-          </Box>
-        )}
+              {/* Mobile Nav Links */}
+              <VStack h="100%" justify="center" alignItems="center" gap={6}>
+                <Box onClick={onToggle}>
+                  {navLink("/", "Home")}
+                </Box>
+                <Box onClick={onToggle}>
+                  {navLink("/shop", "Shop")}
+                </Box>
+
+                {/* Mobile Categories Section */}
+                {mobileCategoriesDropdown()}
+
+                <Box onClick={onToggle}>
+                  {navLink("/about", "About")}
+                </Box>
+                <Box onClick={onToggle}>
+                  {navLink("/contact", "Contact")}
+                </Box>
+                <Box onClick={onToggle}>
+                  {navLink(
+                    "/cart",
+                    "Cart",
+                    <ShoppingCart size={20} />,
+                    true
+                  )}
+                </Box>
+
+                {/* Mobile Auth Section */}
+                <Box pt={4} borderTop="1px solid" borderTopColor="rgba(16, 185, 129, 0.2)">
+                  {authState.isAuthenticated ? (
+                    <VStack gap={4}>
+                      <Box onClick={onToggle}>
+                        {navLink("/profile", "Profile", <User size={20} />)}
+                      </Box>
+                      <Button
+                        variant="outline"
+                        colorScheme="red"
+                        size="sm"
+                        onClick={() => {
+                          // Handle logout in mobile menu
+                          onToggle();
+                        }}
+                      >
+                        <HStack gap={2}>
+                          <LogIn size={16} />
+                          <Text>Logout</Text>
+                        </HStack>
+                      </Button>
+                    </VStack>
+                  ) : (
+                    <Button
+                      colorScheme="blue"
+                      size="md"
+                      onClick={() => {
+                        setAuthModalOpen(true);
+                        onToggle();
+                      }}
+                    >
+                      <HStack gap={2}>
+                        <LogIn size={16} />
+                        <Text>Sign In</Text>
+                      </HStack>
+                    </Button>
+                  )}
+                </Box>
+              </VStack>
+            </Box>
+          )}
+        </Box>
       </Box>
-    </Box>
+
+      {/* Auth Modal */}
+      <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
+    </>
   );
 };
 
