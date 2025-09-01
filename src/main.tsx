@@ -23,7 +23,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             <Route path="/" index element={<App />} />
             <Route path="/shop" element={<Shop />} />
             <Route path="/cart" element={<Cart />} />
-            <Route path="/checkout" element={<Checkout />} /> {/* Add this route */}
+            <Route path="/checkout" element={<Checkout />} /> 
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
           </Routes>

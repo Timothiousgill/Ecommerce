@@ -14,13 +14,14 @@ import {
   useBreakpointValue,
   Skeleton,
   Badge,
+ 
 } from '@chakra-ui/react';
 import { Grid as GridIcon, List, ChevronLeft, ChevronRight } from 'lucide-react';
 import FilterSidebar, { type FilterState } from '../components/FilterSidebar';
 import ProductCard from '../components/ProductCard';
 import { fetchProducts, type Product } from '../api/productApi';
 
-const PRODUCTS_PER_PAGE = 8; // Adjusted for larger cards
+const PRODUCTS_PER_PAGE = 8;
 
 const Shop: React.FC = () => {
   const location = useLocation();
@@ -31,7 +32,7 @@ const Shop: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  
+
   const isMobile = useBreakpointValue({ base: true, lg: false });
 
   // Filter state
@@ -51,7 +52,7 @@ const Shop: React.FC = () => {
         setError(null);
         const data = await fetchProducts();
         setProducts(data);
-        
+
         // Set initial price range based on actual product data
         if (data.length > 0) {
           const prices = data.map(p => p.price);
@@ -192,8 +193,8 @@ const Shop: React.FC = () => {
                 </Box>
               </Box>
             )}
-            
-            {/* Products Grid Skeleton - Updated for larger cards */}
+
+            {/* Products Grid Skeleton */}
             <Box flex={1}>
               <Grid
                 templateColumns={{
@@ -294,6 +295,7 @@ const Shop: React.FC = () => {
                     />
                   )}
 
+
                   {/* View Toggle */}
                   <HStack bg="white" borderRadius="md" p={1} shadow="sm">
                     <IconButton
@@ -325,11 +327,11 @@ const Shop: React.FC = () => {
                     viewMode === 'list'
                       ? "1fr"
                       : {
-                          base: "1fr",
-                          md: "repeat(2, 1fr)",
-                          lg: isMobile ? "repeat(2, 1fr)" : "repeat(2, 1fr)",
-                          xl: isMobile ? "repeat(3, 1fr)" : "repeat(3, 1fr)",
-                        }
+                        base: "1fr",
+                        md: "repeat(2, 1fr)",
+                        lg: isMobile ? "repeat(2, 1fr)" : "repeat(2, 1fr)",
+                        xl: isMobile ? "repeat(3, 1fr)" : "repeat(3, 1fr)",
+                      }
                   }
                   gap={6} // Larger gap for bigger cards
                 >
@@ -374,7 +376,12 @@ const Shop: React.FC = () => {
                     onClick={handlePrevPage}
                     disabled={currentPage === 1}
                     variant="outline"
+                    color={"gray.500"}
                     size="sm"
+                    _hover={{
+                      color: "white",
+                      bg: "gray.700",
+                    }}
                   >
                     <ChevronLeft size={16} />
                     Previous
@@ -412,10 +419,17 @@ const Shop: React.FC = () => {
                     disabled={currentPage === totalPages}
                     variant="outline"
                     size="sm"
+                    color="gray.500"
+                    _hover={{
+                      bg: "gray.700",   
+                      color: "white",   
+                      borderColor: "gray.700",
+                    }}
                   >
                     Next
                     <ChevronRight size={16} />
                   </Button>
+
                 </Flex>
               )}
             </VStack>
