@@ -9,7 +9,8 @@ import {
 } from "@chakra-ui/react";
 
 
-import aboutImg from "D:/Ili Digital/Ecommerce/src/assets/about.png";
+import aboutImg from "../assets/about.png";
+
 
 const About = () => {
   return (
