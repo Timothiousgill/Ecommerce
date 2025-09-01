@@ -14,7 +14,7 @@ import {
 } from "@chakra-ui/react";
 import {
   Link as RouterLink,
-  type LinkProps as RouterLinkProps, 
+  type LinkProps as RouterLinkProps,
   useLocation,
   useNavigate,
 } from "react-router-dom";
@@ -41,37 +41,37 @@ const Navbar = () => {
   const [loading, setLoading] = useState(true);
 
 
-useEffect(() => {
-  const getCategories = async () => {
-    try {
-      const data = await fetchCategories();
+  useEffect(() => {
+    const getCategories = async () => {
+      try {
+        const data = await fetchCategories();
 
-      const transformedCategories: Category[] = data.map((category: string) => ({
-        name: category,
-        displayName: category
-          .split(" ")
-          .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(" ")
-          .replace(/'/g, ""),
-      }));
+        const transformedCategories: Category[] = data.map((category: string) => ({
+          name: category,
+          displayName: category
+            .split(" ")
+            .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ")
+            .replace(/'/g, ""),
+        }));
 
-      setCategories(transformedCategories);
-    } catch (error) {
-      console.error("Failed to fetch categories:", error);
+        setCategories(transformedCategories);
+      } catch (error) {
+        console.error("Failed to fetch categories:", error);
 
 
-    } finally {
-      setLoading(false);
-    }
-  };
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  getCategories();
-}, []);
+    getCategories();
+  }, []);
 
 
   // Handle category selection
   const handleCategorySelect = (categoryName: string) => {
-    navigate('/shop', { 
+    navigate('/shop', {
       state: { category: categoryName }
     });
     if (open) {
@@ -145,7 +145,7 @@ useEffect(() => {
 
   // Custom categories dropdown menu
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  
+
   const categoriesDropdown = () => (
     <Box position="relative" role="group">
       <Box
@@ -189,7 +189,7 @@ useEffect(() => {
           }}
         />
       </Box>
-      
+
       {/* Dropdown Menu */}
       {dropdownOpen && (
         <Box
@@ -226,7 +226,7 @@ useEffect(() => {
                 color="#9CA3AF"
                 fontSize="sm"
                 fontWeight="medium"
-                _hover={{ 
+                _hover={{
                   bg: "rgba(16, 185, 129, 0.1)",
                   color: "#10B981"
                 }}
@@ -265,7 +265,7 @@ useEffect(() => {
           Categories
         </Text>
       </Box>
-      
+
       {loading ? (
         <Box px={6} py={3}>
           <Text fontSize="sm" color="#9CA3AF">Loading categories...</Text>
@@ -279,7 +279,7 @@ useEffect(() => {
               py={3}
               cursor="pointer"
               onClick={() => handleCategorySelect(category.name)}
-              _hover={{ 
+              _hover={{
                 bg: "rgba(16, 185, 129, 0.1)",
                 borderLeft: "3px solid #10B981"
               }}
@@ -335,6 +335,64 @@ useEffect(() => {
             ILi Shop
           </NavLink>
 
+          {/* Mobile Left Side: Hamburger + SVG */}
+          <HStack
+            gap={3}
+            display={{ base: "flex", md: "none" }}
+            align="center"
+            order={{ base: -1, md: "initial" }} // move to left only on mobile
+          >
+            {/* Hamburger Menu */}
+            <Box
+              as="button"
+              onClick={onToggle}
+              w="24px"
+              h="20px"
+              position="relative"
+              cursor="pointer"
+            >
+              <Box
+                as="span"
+                position="absolute"
+                top={0}
+                left={0}
+                h="2px"
+                w="100%"
+                bg="white"
+                borderRadius="md"
+                transform={open ? "rotate(45deg) translateY(9px)" : "none"}
+                transition="0.3s"
+              />
+              <Box
+                as="span"
+                position="absolute"
+                top="50%"
+                left={0}
+                h="2px"
+                w="100%"
+                bg="white"
+                borderRadius="md"
+                transform="translateY(-50%)"
+                opacity={open ? 0 : 1}
+                transition="0.3s"
+              />
+              <Box
+                as="span"
+                position="absolute"
+                bottom={0}
+                left={0}
+                h="2px"
+                w="100%"
+                bg="white"
+                borderRadius="md"
+                transform={open ? "rotate(-45deg) translateY(-9px)" : "none"}
+                transition="0.3s"
+              />
+            </Box>
+
+
+          </HStack>
+
           {/* Desktop Navigation */}
           <Box display={{ base: "none", md: "block" }}>
             <HStack gap={2} alignItems="center">
@@ -347,60 +405,23 @@ useEffect(() => {
                 "/cart",
                 "Cart",
                 <ShoppingCart size={20} />,
-                true // Show badge for cart
+                true
               )}
             </HStack>
           </Box>
-
-          {/* Mobile Menu Button */}
-          <Box
-            display={{ base: "block", md: "none" }}
-            as="button"
-            onClick={onToggle}
-            w="24px"
-            h="20px"
-            position="relative"
-            cursor="pointer"
-          >
-            <Box
-              as="span"
-              position="absolute"
-              top={0}
-              left={0}
-              h="2px"
-              w="100%"
-              bg="white"
-              borderRadius="md"
-              transform={open ? "rotate(45deg) translateY(9px)" : "none"}
-              transition="0.3s"
-            />
-            <Box
-              as="span"
-              position="absolute"
-              top="50%"
-              left={0}
-              h="2px"
-              w="100%"
-              bg="white"
-              borderRadius="md"
-              transform="translateY(-50%)"
-              opacity={open ? 0 : 1}
-              transition="0.3s"
-            />
-            <Box
-              as="span"
-              position="absolute"
-              bottom={0}
-              left={0}
-              h="2px"
-              w="100%"
-              bg="white"
-              borderRadius="md"
-              transform={open ? "rotate(-45deg) translateY(-9px)" : "none"}
-              transition="0.3s"
-            />
+          <Box display="flex" alignItems="center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 200 200"
+              width="28"
+              height="28"
+              fill="currentColor"
+            >
+              <path d="M157 146.667V160a4 4 0 0 1-8 0v-13.333C149 134.168 138.906 124 126.5 124h-53C61.094 124 51 134.168 51 146.667V160a4 4 0 0 1-8 0v-13.333C43 129.757 56.683 116 73.5 116h53c16.817 0 30.5 13.757 30.5 30.667zm-87.5-80C69.5 49.757 83.183 36 100 36s30.5 13.757 30.5 30.667c0 16.909-13.683 30.666-30.5 30.666S69.5 83.576 69.5 66.667zm8 0c0 12.498 10.094 22.666 22.5 22.666s22.5-10.168 22.5-22.666C122.5 54.168 112.406 44 100 44S77.5 54.168 77.5 66.667z" />
+            </svg>
           </Box>
         </Flex>
+
 
         {/* Mobile Menu */}
         {open && (
@@ -468,10 +489,10 @@ useEffect(() => {
               <Box onClick={onToggle}>
                 {navLink("/shop", "Shop")}
               </Box>
-              
+
               {/* Mobile Categories Section */}
               {mobileCategoriesDropdown()}
-              
+
               <Box onClick={onToggle}>
                 {navLink("/about", "About")}
               </Box>
@@ -483,9 +504,10 @@ useEffect(() => {
                   "/cart",
                   "Cart",
                   <ShoppingCart size={20} />,
-                  true // Show badge for cart in mobile too
+                  true
                 )}
               </Box>
+
             </VStack>
           </Box>
         )}
