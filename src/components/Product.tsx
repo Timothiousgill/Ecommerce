@@ -11,8 +11,7 @@ import {
   HStack,
 } from "@chakra-ui/react";
 import ProductCard from "./ProductCard";
-import type { Product } from ".././api/productApi";
-import { fetchProducts } from "../api/productApi";
+import { fetchProducts, type Product } from "../api/productApi";
 
 const Products: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -24,7 +23,7 @@ const Products: React.FC = () => {
       try {
         setLoading(true);
         setError(null);
-        const data = await fetchProducts(); // ✅ using API function
+        const data = await fetchProducts(); 
         setProducts(data);
       } catch (err: unknown) {
         if (err instanceof Error) {

@@ -98,7 +98,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   };
 
   const handleViewProduct = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent any parent click handlers
+    e.stopPropagation(); 
     navigate(`/product/${product.id}`);
   };
 
