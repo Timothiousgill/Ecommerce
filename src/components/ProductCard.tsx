@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Image,
@@ -12,7 +13,7 @@ import {
   createToaster,
 } from '@chakra-ui/react';
 import { ShoppingCart, Check, Eye } from 'lucide-react';
-import { useCart } from '../components/hooks/useCart';
+import { useCart } from '../components/hooks/useCart'; 
 
 // Product interface
 interface Product {
@@ -39,6 +40,8 @@ const toaster = createToaster({
 });
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+  console.log(product,"data");
+  const navigate = useNavigate();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
@@ -69,7 +72,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     return stars;
   };
 
-  const handleAddToCart = async () => {
+  const handleAddToCart = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click when clicking add to cart
+    
     try {
       setIsAdding(true);
       addToCart(product);
@@ -92,12 +97,21 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     }
   };
 
-  const defaultImage = 'https://via.placeholder.com/300x300?text=No+Image';
+  const handleViewProduct = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent any parent click handlers
+    navigate(`/product/${product.id}`);
+  };
+
+  const handleCardClick = () => {
+    navigate(`/product/${product.id}`);
+  };
+
+  const defaultImage = 'https://placehold.co/300x300?text=No+Image';
 
   return (
     <Box
       w="full"
-      maxW="400px" // Increased max width for larger cards
+      maxW="400px"
       borderWidth="1px"
       borderColor="gray.200"
       borderRadius="xl"
@@ -116,6 +130,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       position="relative"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      cursor="pointer"
+      onClick={handleCardClick}
     >
       {/* Product Image Container */}
       <Box position="relative" overflow="hidden">
@@ -125,11 +141,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             <Image
               src={imageError ? defaultImage : product.image}
               alt={product.title}
-              objectFit="contain" // Changed from 'cover' to 'contain' to prevent zoom/cropping
+              objectFit="contain"
               objectPosition="center"
               w="full"
               h="full"
-              p={2} // Added padding to prevent image from touching edges
+              p={2}
               onLoad={() => setImageLoaded(true)}
               onError={() => {
                 setImageError(true);
@@ -154,7 +170,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             >
               <Button
                 size="md"
-                colorScheme="whiteAlpha"
                 variant="solid"
                 opacity={isHovered ? 1 : 0}
                 transform={isHovered ? "translateY(0)" : "translateY(20px)"}
@@ -164,6 +179,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 _hover={{ bg: "gray.100" }}
                 borderRadius="lg"
                 fontWeight="bold"
+                onClick={handleViewProduct}
               >
                 <HStack gap={2}>
                   <Eye size={18} />
@@ -177,7 +193,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               position="absolute"
               top={3}
               left={3}
-              colorScheme="blue"
+              colorPalette="blue"
               variant="solid"
               fontSize="xs"
               textTransform="capitalize"
@@ -201,9 +217,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           lineHeight="short"
           color="gray.800"
           title={product.title}
-          minH="48px" // Increased min height for larger cards
+          minH="48px"
         >
-          {truncateTitle(product.title, 60)} {/* Increased character limit */}
+          {truncateTitle(product.title, 60)}
         </Text>
 
         {/* Rating */}
@@ -223,15 +239,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
         {/* Add to Cart Button */}
         <Button
-          colorScheme="blue"
-          size="lg" // Larger button for bigger cards
+          colorPalette="blue"
+          size="lg"
           mt="auto"
           onClick={handleAddToCart}
           disabled={isAdding}
           _hover={{ transform: 'scale(1.02)' }}
           borderRadius="lg"
           fontWeight="bold"
-          h="48px" // Fixed height for consistency
+          h="48px"
         >
           <HStack gap={2}>
             {cartQuantity > 0 ? (
@@ -253,7 +269,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           <Button
             size="md"
             variant="outline"
-            colorScheme="blue"
+            colorPalette="blue"
             onClick={handleAddToCart}
             disabled={isAdding}
             borderRadius="lg"

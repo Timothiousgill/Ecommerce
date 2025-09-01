@@ -669,13 +669,13 @@ const Home = () => {
                   <HStack>
                     <Icon as={FaMapMarkerAlt} color="green.400" />
                     <Text fontSize="sm" color="gray.300">
-                      123 Store Street, City, State 12345
+                      DHA business hub, Block D, Main Broadway, DHA Phase 8, Lahore
                     </Text>
                   </HStack>
                   <HStack>
                     <Icon as={FaPhone} color="green.400" />
                     <Text fontSize="sm" color="gray.300">
-                      +1 (555) 123-4567
+                      0321 4224534
                     </Text>
                   </HStack>
                   <HStack>

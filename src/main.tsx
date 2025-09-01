@@ -8,6 +8,7 @@ import Contact from "./pages/Contact.tsx";
 import Shop from "./pages/Shop.tsx";
 import Cart from "./pages/Cart.tsx";
 import Checkout from "./pages/Checkout.tsx"; 
+import ProductDetails from "./pages/ProductDetails.tsx"; // Add this import
 import Navbar from "./components/Navbar.tsx";
 import { CartProvider } from "./components/context/CartContext.tsx";
 
@@ -22,6 +23,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           <Routes>
             <Route path="/" index element={<App />} />
             <Route path="/shop" element={<Shop />} />
+            <Route path="/product/:id" element={<ProductDetails />} /> 
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} /> 
             <Route path="/about" element={<About />} />
