@@ -42,7 +42,6 @@ interface FormErrors {
 }
 
 const Profile: React.FC = () => {
-    
     const { state: authState, logout } = useAuth();
     const { state: cartState } = useCart();
     const [isEditing, setIsEditing] = useState(false);
@@ -90,8 +89,6 @@ const Profile: React.FC = () => {
     const { user } = authState;
     const fullName = `${user.name.firstname} ${user.name.lastname}`;
     const initials = `${user.name.firstname.charAt(0)}${user.name.lastname.charAt(0)}`.toUpperCase();
-
-
 
     // Mock order history for demo
     const mockOrders = [
@@ -276,7 +273,9 @@ const Profile: React.FC = () => {
                     {/* Success Message */}
                     {successMessage && (
                         <Alert.Root status="success" borderRadius="md">
-                            <Text fontSize="sm">{successMessage}</Text>
+                            <Alert.Indicator />
+                            <Alert.Title>Success!</Alert.Title>
+                            <Alert.Description>{successMessage}</Alert.Description>
                         </Alert.Root>
                     )}
 
@@ -328,8 +327,8 @@ const Profile: React.FC = () => {
 
                             {/* Profile Avatar */}
                             <VStack gap={4} mb={6}>
-                                <Avatar.Root size="xl">
-                                    <Avatar.Fallback bg="blue.500" color="white" fontSize="2xl" fontWeight="bold">
+                                <Avatar.Root size="xl" bg="blue.500" color="white">
+                                    <Avatar.Fallback fontSize="2xl" fontWeight="bold">
                                         {initials}
                                     </Avatar.Fallback>
                                 </Avatar.Root>
@@ -341,10 +340,11 @@ const Profile: React.FC = () => {
                                 </VStack>
                             </VStack>
 
-
                             {errors.general && (
                                 <Alert.Root status="error" borderRadius="md" mb={4}>
-                                    <Text fontSize="sm">{errors.general}</Text>
+                                    <Alert.Indicator />
+                                    <Alert.Title>Error</Alert.Title>
+                                    <Alert.Description>{errors.general}</Alert.Description>
                                 </Alert.Root>
                             )}
 
@@ -358,6 +358,7 @@ const Profile: React.FC = () => {
                                                 <Input
                                                     value={editForm.name.firstname}
                                                     onChange={handleFormChange('firstname')}
+                                                    color="gray.700"
                                                 />
                                                 <Field.ErrorText>{errors.firstname}</Field.ErrorText>
                                             </Field.Root>
@@ -367,6 +368,7 @@ const Profile: React.FC = () => {
                                                 <Input
                                                     value={editForm.name.lastname}
                                                     onChange={handleFormChange('lastname')}
+                                                    color="gray.700"
                                                 />
                                                 <Field.ErrorText>{errors.lastname}</Field.ErrorText>
                                             </Field.Root>
@@ -378,6 +380,7 @@ const Profile: React.FC = () => {
                                                 type="email"
                                                 value={editForm.email}
                                                 onChange={handleFormChange('email')}
+                                                color="gray.700"
                                             />
                                             <Field.ErrorText>{errors.email}</Field.ErrorText>
                                         </Field.Root>
@@ -387,6 +390,7 @@ const Profile: React.FC = () => {
                                             <Input
                                                 value={editForm.username}
                                                 onChange={handleFormChange('username')}
+                                                color="gray.700"
                                             />
                                             <Field.ErrorText>{errors.username}</Field.ErrorText>
                                         </Field.Root>
@@ -397,6 +401,7 @@ const Profile: React.FC = () => {
                                                 type="tel"
                                                 value={editForm.phone}
                                                 onChange={handleFormChange('phone')}
+                                                color="gray.700"
                                             />
                                             <Field.ErrorText>{errors.phone}</Field.ErrorText>
                                         </Field.Root>
@@ -412,6 +417,7 @@ const Profile: React.FC = () => {
                                             <Input
                                                 value={editForm.address.street}
                                                 onChange={handleFormChange('street')}
+                                                color="gray.700"
                                             />
                                             <Field.ErrorText>{errors.street}</Field.ErrorText>
                                         </Field.Root>
@@ -422,6 +428,7 @@ const Profile: React.FC = () => {
                                                 <Input
                                                     value={editForm.address.city}
                                                     onChange={handleFormChange('city')}
+                                                    color="gray.700"
                                                 />
                                                 <Field.ErrorText>{errors.city}</Field.ErrorText>
                                             </Field.Root>
@@ -431,6 +438,7 @@ const Profile: React.FC = () => {
                                                 <Input
                                                     value={editForm.address.zipcode}
                                                     onChange={handleFormChange('zipcode')}
+                                                    color="gray.700"
                                                 />
                                                 <Field.ErrorText>{errors.zipcode}</Field.ErrorText>
                                             </Field.Root>
@@ -549,6 +557,7 @@ const Profile: React.FC = () => {
                                             borderRadius="lg"
                                             _hover={{ bg: "gray.100" }}
                                             transition="background 0.2s"
+                                            cursor="pointer"
                                         >
                                             <VStack align="flex-start" gap={1}>
                                                 <Text fontSize="sm" fontWeight="semibold" color="gray.700">

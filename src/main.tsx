@@ -10,6 +10,8 @@ import Cart from "./pages/Cart.tsx";
 import Checkout from "./pages/Checkout.tsx"; 
 import ProductDetails from "./pages/ProductDetails.tsx";
 import Profile from "./pages/Profile.tsx"; 
+import OrderHistory from "./pages/OrderHistory.tsx"; // Add this import
+import Settings from "./pages/settings.tsx"; // Add this import
 import Navbar from "./components/Navbar.tsx";
 import { CartProvider } from "./components/context/CartContext.tsx";
 import { AuthProvider } from "./components/context/AuthContext.tsx"; 
@@ -30,6 +32,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<Checkout />} /> 
               <Route path="/profile" element={<Profile />} /> 
+              <Route path="/history" element={<OrderHistory />} /> {/* Add this route */}
+              <Route path="/settings" element={<Settings />} /> {/* Add this route */}
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
             </Routes>

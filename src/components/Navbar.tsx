@@ -19,7 +19,7 @@ import {
   useLocation,
   useNavigate,
 } from "react-router-dom";
-import { ShoppingCart, ChevronDown, User, LogIn } from "lucide-react";
+import { ShoppingCart, ChevronDown, User, LogIn, Package, Settings as SettingsIcon } from "lucide-react";
 import { useCart } from '../components/hooks/useCart';
 import { useAuth } from '../components/hooks/useAuth';
 import { UserMenu } from './UserMenu';
@@ -41,7 +41,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const { open, onToggle } = useDisclosure();
   const { state: cartState } = useCart();
-  const { state: authState } = useAuth();
+  const { state: authState, logout } = useAuth();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [authModalOpen, setAuthModalOpen] = useState(false);
@@ -88,6 +88,13 @@ const Navbar = () => {
     } else {
       setAuthModalOpen(true);
     }
+  };
+
+  // Handle mobile logout
+  const handleMobileLogout = () => {
+    logout();
+    onToggle();
+    navigate('/');
   };
 
   // Reusable nav link
@@ -317,6 +324,69 @@ const Navbar = () => {
     </VStack>
   );
 
+  // Mobile user menu section
+  const mobileUserMenu = () => (
+    <VStack align="stretch" gap={0} w="full" pt={4} borderTop="1px solid" borderTopColor="rgba(16, 185, 129, 0.2)">
+      {authState.isAuthenticated ? (
+        <VStack align="stretch" gap={0} w="full">
+          {/* User Info */}
+          <Box px={6} py={3} borderBottom="1px solid" borderBottomColor="rgba(16, 185, 129, 0.2)" mb={2}>
+            <Text fontSize="sm" fontWeight="bold" color="#10B981" mb={1}>
+              Welcome, {authState.user?.name.firstname}!
+            </Text>
+            <Text fontSize="xs" color="#9CA3AF">
+              @{authState.user?.username}
+            </Text>
+          </Box>
+
+          {/* User Menu Links */}
+          <Box onClick={onToggle}>
+            {navLink("/profile", "Profile", <User size={16} />)}
+          </Box>
+          <Box onClick={onToggle}>
+            {navLink("/history", "Order History", <Package size={16} />)}
+          </Box>
+          <Box onClick={onToggle}>
+            {navLink("/settings", "Settings", <SettingsIcon size={16} />)}
+          </Box>
+
+          {/* Logout Button */}
+          <Box px={6} py={3}>
+            <Button
+              variant="outline"
+              colorScheme="red"
+              size="sm"
+              w="full"
+              onClick={handleMobileLogout}
+            >
+              <HStack gap={2}>
+                <LogIn size={16} />
+                <Text>Logout</Text>
+              </HStack>
+            </Button>
+          </Box>
+        </VStack>
+      ) : (
+        <Box px={6} py={3}>
+          <Button
+            colorScheme="blue"
+            size="md"
+            w="full"
+            onClick={() => {
+              setAuthModalOpen(true);
+              onToggle();
+            }}
+          >
+            <HStack gap={2}>
+              <LogIn size={16} />
+              <Text>Sign In</Text>
+            </HStack>
+          </Button>
+        </Box>
+      )}
+    </VStack>
+  );
+
   return (
     <>
       <Box
@@ -470,6 +540,7 @@ const Navbar = () => {
               h="100vh"
               bg="#1C283C"
               zIndex={49}
+              overflowY="auto"
             >
               {/* Logo at top-left */}
               <NavLink
@@ -518,70 +589,40 @@ const Navbar = () => {
                 />
               </Box>
 
-              {/* Mobile Nav Links */}
-              <VStack h="100%" justify="center" alignItems="center" gap={6}>
-                <Box onClick={onToggle}>
-                  {navLink("/", "Home")}
-                </Box>
-                <Box onClick={onToggle}>
-                  {navLink("/shop", "Shop")}
-                </Box>
+              {/* Mobile Nav Content */}
+              <VStack h="100%" justify="center" alignItems="center" gap={4} px={6}>
+                {/* Main Navigation Links */}
+                <VStack gap={2} w="full">
+                  <Box onClick={onToggle} w="full" textAlign="center">
+                    {navLink("/", "Home")}
+                  </Box>
+                  <Box onClick={onToggle} w="full" textAlign="center">
+                    {navLink("/shop", "Shop")}
+                  </Box>
+                  <Box onClick={onToggle} w="full" textAlign="center">
+                    {navLink("/about", "About")}
+                  </Box>
+                  <Box onClick={onToggle} w="full" textAlign="center">
+                    {navLink("/contact", "Contact")}
+                  </Box>
+                  <Box onClick={onToggle} w="full" textAlign="center">
+                    {navLink(
+                      "/cart",
+                      "Cart",
+                      <ShoppingCart size={20} />,
+                      true
+                    )}
+                  </Box>
+                </VStack>
 
                 {/* Mobile Categories Section */}
-                {mobileCategoriesDropdown()}
-
-                <Box onClick={onToggle}>
-                  {navLink("/about", "About")}
-                </Box>
-                <Box onClick={onToggle}>
-                  {navLink("/contact", "Contact")}
-                </Box>
-                <Box onClick={onToggle}>
-                  {navLink(
-                    "/cart",
-                    "Cart",
-                    <ShoppingCart size={20} />,
-                    true
-                  )}
+                <Box w="full" maxW="300px">
+                  {mobileCategoriesDropdown()}
                 </Box>
 
-                {/* Mobile Auth Section */}
-                <Box pt={4} borderTop="1px solid" borderTopColor="rgba(16, 185, 129, 0.2)">
-                  {authState.isAuthenticated ? (
-                    <VStack gap={4}>
-                      <Box onClick={onToggle}>
-                        {navLink("/profile", "Profile", <User size={20} />)}
-                      </Box>
-                      <Button
-                        variant="outline"
-                        colorScheme="red"
-                        size="sm"
-                        onClick={() => {
-                          // Handle logout in mobile menu
-                          onToggle();
-                        }}
-                      >
-                        <HStack gap={2}>
-                          <LogIn size={16} />
-                          <Text>Logout</Text>
-                        </HStack>
-                      </Button>
-                    </VStack>
-                  ) : (
-                    <Button
-                      colorScheme="blue"
-                      size="md"
-                      onClick={() => {
-                        setAuthModalOpen(true);
-                        onToggle();
-                      }}
-                    >
-                      <HStack gap={2}>
-                        <LogIn size={16} />
-                        <Text>Sign In</Text>
-                      </HStack>
-                    </Button>
-                  )}
+                {/* Mobile User Section */}
+                <Box w="full" maxW="300px">
+                  {mobileUserMenu()}
                 </Box>
               </VStack>
             </Box>
