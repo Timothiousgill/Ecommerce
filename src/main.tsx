@@ -10,8 +10,8 @@ import Cart from "./pages/Cart.tsx";
 import Checkout from "./pages/Checkout.tsx"; 
 import ProductDetails from "./pages/ProductDetails.tsx";
 import Profile from "./pages/Profile.tsx"; 
-import OrderHistory from "./pages/OrderHistory.tsx"; // Add this import
-import Settings from "./pages/settings.tsx"; // Add this import
+import OrderHistory from "./pages/OrderHistory.tsx"; 
+import Settings from "./pages/Settings.tsx";
 import Navbar from "./components/Navbar.tsx";
 import { CartProvider } from "./components/context/CartContext.tsx";
 import { AuthProvider } from "./components/context/AuthContext.tsx"; 

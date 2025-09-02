@@ -10,7 +10,7 @@ interface AuthState {
     error: string | null;
 }
 
-// Action types for auth operations
+// Action for auth operations
 type AuthAction =
     | { type: 'LOGIN_START' }
     | { type: 'LOGIN_SUCCESS'; payload: { token: string; user: User } }

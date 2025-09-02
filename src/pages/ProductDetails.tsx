@@ -5,7 +5,6 @@ import {
     Container,
     HStack,
     VStack,
-    Flex,
     Grid,
     Text,
     Button,
@@ -20,9 +19,8 @@ import {
     ShoppingCart,
     Check,
 } from 'lucide-react';
-import { fetchProductById, fetchProductsByCategory, type Product } from '../api/productApi';
+import { fetchProductById, type Product } from '../api/productApi';
 import { useCart } from '../components/hooks/useCart';
-import ProductCard from '../components/ProductCard';
 
 // Create toaster instance
 const toaster = createToaster({
@@ -39,7 +37,6 @@ const ProductDetails: React.FC = () => {
     const passedTitle = location.state?.productTitle;
 
     const [product, setProduct] = useState<Product | null>(null);
-    const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [quantity, setQuantity] = useState(1);
@@ -72,12 +69,6 @@ const ProductDetails: React.FC = () => {
 
                 const productData = await fetchProductById(parseInt(id));
                 setProduct(productData);
-
-                const relatedData = await fetchProductsByCategory(productData.category);
-                const filteredRelated = relatedData
-                    .filter(p => p.id !== productData.id)
-                    .slice(0, 4);
-                setRelatedProducts(filteredRelated);
 
             } catch (err) {
                 console.error('Error loading product:', err);
@@ -417,27 +408,6 @@ const ProductDetails: React.FC = () => {
                                 </Button>
                             </VStack>
 
-                            {/* Debug Info */}
-                            {/* <Box bg="yellow.50" p={4} borderRadius="md" border="1px solid" borderColor="yellow.200">
-                                <Text fontSize="xs" fontWeight="bold" color="yellow.800" mb={2}>
-                                    Debug Info (remove in production):
-                                </Text>
-                                <VStack align="stretch" gap={1}>
-                                    <Text fontSize="xs" color="gray.600">
-                                        Product ID: {product.id}
-                                    </Text>
-                                    <Text fontSize="xs" color="gray.600" wordBreak="break-all">
-                                        Image URL: {product.image}
-                                    </Text>
-                                    <Text fontSize="xs" color="gray.600">
-                                        Image Error: {imageError ? 'Yes' : 'No'}
-                                    </Text>
-                                    <Text fontSize="xs" color="gray.600">
-                                        Passed Image: {getImageSrc() || 'None'}
-                                    </Text>
-                                </VStack>
-                            </Box> */}
-
                             {/* Product Features */}
                             <Box
                                 bg="blue.50"
@@ -472,54 +442,6 @@ const ProductDetails: React.FC = () => {
                             </Box>
                         </VStack>
                     </Grid>
-
-                    {/* Related Products Section */}
-                    {relatedProducts.length > 0 && (
-                        <Box mt={16}>
-                            <VStack gap={8} align="stretch">
-                                <Box>
-                                    <Text fontSize="2xl" fontWeight="bold" color="gray.800" mb={2}>
-                                        Related Products
-                                    </Text>
-                                    <Text color="gray.600">
-                                        Other products from {product.category}
-                                    </Text>
-                                </Box>
-
-                                <Grid
-                                    templateColumns={{
-                                        base: "1fr",
-                                        md: "repeat(2, 1fr)",
-                                        lg: "repeat(3, 1fr)",
-                                        xl: "repeat(4, 1fr)",
-                                    }}
-                                    gap={6}
-                                >
-                                    {relatedProducts.map((relatedProduct) => (
-                                        <ProductCard key={relatedProduct.id} product={relatedProduct} />
-                                    ))}
-                                </Grid>
-
-                                <Flex justify="center">
-                                    <Button
-                                        onClick={() => navigate('/shop')}
-                                        variant="outline"
-                                        colorPalette="blue"
-                                        size="lg"
-                                        borderRadius="lg"
-                                        color={"gray.600"}
-                                        _hover={{
-                                            bg: "black",
-                                            color: "white",
-                                            borderColor: "gray.700",
-                                        }}
-                                    >
-                                        View All Products
-                                    </Button>
-                                </Flex>
-                            </VStack>
-                        </Box>
-                    )}
                 </VStack>
             </Container>
         </Box>
