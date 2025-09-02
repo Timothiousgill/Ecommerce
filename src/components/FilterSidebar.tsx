@@ -1,17 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { useDebounce } from "../components/hooks/useDebounce";
+import React, { useState } from 'react';
 
 import {
     Box,
     VStack,
     HStack,
     Text,
-    Input,
     Button,
     Badge,
     useBreakpointValue,
 } from '@chakra-ui/react';
-import { Search, Filter } from 'lucide-react';
+import { Filter } from 'lucide-react';
 
 export interface FilterState {
     searchQuery: string;
@@ -34,20 +32,8 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
     categories,
     priceRange,
 }) => {
-    const [localSearchQuery, setLocalSearchQuery] = useState(filters.searchQuery);
     const [showMobileFilters, setShowMobileFilters] = useState(false);
-    const debouncedSearchQuery = useDebounce(localSearchQuery, 500);
     const isMobile = useBreakpointValue({ base: true, lg: false });
-
-
-    useEffect(() => {
-        if (debouncedSearchQuery !== filters.searchQuery) {
-            onFiltersChange({
-                ...filters,
-                searchQuery: debouncedSearchQuery,
-            });
-        }
-    }, [debouncedSearchQuery, filters, onFiltersChange]);
 
     const handleCategoryChange = (category: string, checked: boolean) => {
         const newCategories = checked
@@ -82,7 +68,6 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
     };
 
     const clearFilters = () => {
-        setLocalSearchQuery('');
         onFiltersChange({
             searchQuery: '',
             categories: [],
@@ -104,38 +89,6 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
 
     const FilterContent = () => (
         <VStack align="stretch" gap={6} w="full">
-            {/* Search Input */}
-            <Box>
-                <Text fontSize="sm" fontWeight="semibold" mb={3} color="gray.700">
-                    Search Products
-                </Text>
-                <Box position="relative">
-                    <Input
-                        placeholder="Search by product name..."
-                        color={"gray.500"}
-                        value={localSearchQuery}
-                        onChange={(e) => setLocalSearchQuery(e.target.value)}
-                        pr={10}
-                        bg="white"
-                        border="1px solid"
-                        borderColor="gray.200"
-                        _focus={{
-                            borderColor: "blue.500",
-                            boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.6)",
-                        }}
-                    />
-                    <Box
-                        position="absolute"
-                        right={3}
-                        top="50%"
-                        transform="translateY(-50%)"
-                        color="gray.400"
-                    >
-                        <Search size={18} />
-                    </Box>
-                </Box>
-            </Box>
-
             {/* Sort By */}
             <Box>
                 <Text fontSize="sm" fontWeight="semibold" mb={3} color="gray.700">

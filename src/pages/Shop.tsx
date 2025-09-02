@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useLocation, useNavigate } from "react-router-dom";
+import { useDebounce } from "../components/hooks/useDebounce";
 
 import {
   Box,
@@ -11,12 +12,13 @@ import {
   Text,
   Button,
   IconButton,
+  Input,
   useBreakpointValue,
   Skeleton,
   Badge,
- 
+
 } from '@chakra-ui/react';
-import { Grid as GridIcon, List, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Grid as GridIcon, List, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import FilterSidebar, { type FilterState } from '../components/FilterSidebar';
 import ProductCard from '../components/ProductCard';
 import { fetchProducts, type Product } from '../api/productApi';
@@ -32,8 +34,10 @@ const Shop: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [localSearchQuery, setLocalSearchQuery] = useState('');
 
   const isMobile = useBreakpointValue({ base: true, lg: false });
+  const debouncedSearchQuery = useDebounce(localSearchQuery, 500);
 
   // Filter state
   const [filters, setFilters] = useState<FilterState>({
@@ -70,6 +74,20 @@ const Shop: React.FC = () => {
 
     loadProducts();
   }, []);
+  
+  const onFiltersChange = useCallback((newFilters: FilterState) => {
+    setFilters(newFilters);
+  }, []);
+
+  // Handle debounced search
+  useEffect(() => {
+    if (debouncedSearchQuery !== filters.searchQuery) {
+      onFiltersChange({
+        ...filters,
+        searchQuery: debouncedSearchQuery,
+      });
+    }
+  }, [debouncedSearchQuery, filters, onFiltersChange]);
 
   // Apply category filter if passed via navigation (from Home page)
   useEffect(() => {
@@ -96,9 +114,6 @@ const Shop: React.FC = () => {
   }, [products]);
 
 
-  const handleFiltersChange = useCallback((newFilters: FilterState) => {
-    setFilters(newFilters);
-  }, []);
 
   //--------------------------Here is Filtering
   // Filter and sort products
@@ -149,7 +164,7 @@ const Shop: React.FC = () => {
         filtered.sort((a, b) => a.title.localeCompare(b.title));
         break;
       default:
-        filtered.sort((a, b) => a.id - b.id); 
+        filtered.sort((a, b) => a.id - b.id);
     }
 
     return filtered;
@@ -161,7 +176,7 @@ const Shop: React.FC = () => {
     const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
     const endIndex = startIndex + PRODUCTS_PER_PAGE;
     const currentProducts = filteredAndSortedProducts.slice(startIndex, endIndex);
-    
+
     return {
       totalPages,
       startIndex,
@@ -186,6 +201,7 @@ const Shop: React.FC = () => {
 
   // Memoized clear filters handler
   const handleClearFilters = useCallback(() => {
+    setLocalSearchQuery('');
     setFilters({
       searchQuery: '',
       categories: [],
@@ -271,7 +287,7 @@ const Shop: React.FC = () => {
           {!isMobile && (
             <FilterSidebar
               filters={filters}
-              onFiltersChange={handleFiltersChange}
+              onFiltersChange={onFiltersChange}
               categories={categories}
               priceRange={priceRange}
             />
@@ -280,6 +296,45 @@ const Shop: React.FC = () => {
           {/* Main Content */}
           <Box flex={1}>
             <VStack align="stretch" gap={6}>
+              {/* Search Bar - Now at the top of main content */}
+              <Box
+                bg="white"
+                p={4}
+                borderRadius="xl"
+                shadow="sm"
+                border="1px solid"
+                borderColor="gray.200"
+              >
+                <Text fontSize="sm" fontWeight="semibold" mb={3} color="gray.700">
+                  Search Products
+                </Text>
+                <Box position="relative">
+                  <Input
+                    placeholder="Search by product name or description..."
+                    color="gray.500"
+                    value={localSearchQuery}
+                    onChange={(e) => setLocalSearchQuery(e.target.value)}
+                    pr={10}
+                    bg="white"
+                    border="1px solid"
+                    borderColor="gray.200"
+                    _focus={{
+                      borderColor: "blue.500",
+                      boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.6)",
+                    }}
+                  />
+                  <Box
+                    position="absolute"
+                    right={3}
+                    top="50%"
+                    transform="translateY(-50%)"
+                    color="gray.400"
+                  >
+                    <Search size={18} />
+                  </Box>
+                </Box>
+              </Box>
+
               {/* Header */}
               <Flex
                 justify="space-between"
@@ -309,7 +364,7 @@ const Shop: React.FC = () => {
                   {isMobile && (
                     <FilterSidebar
                       filters={filters}
-                      onFiltersChange={handleFiltersChange}
+                      onFiltersChange={onFiltersChange}
                       categories={categories}
                       priceRange={priceRange}
                     />
@@ -370,7 +425,7 @@ const Shop: React.FC = () => {
                     No products found
                   </Text>
                   <Text color="gray.500" mb={4}>
-                    Try adjusting your filters to see more results
+                    Try adjusting your search or filters to see more results
                   </Text>
                   <Button
                     colorPalette="blue"
@@ -434,8 +489,8 @@ const Shop: React.FC = () => {
                     size="sm"
                     color="gray.500"
                     _hover={{
-                      bg: "gray.700",   
-                      color: "white",   
+                      bg: "gray.700",
+                      color: "white",
                       borderColor: "gray.700",
                     }}
                   >
