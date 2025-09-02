@@ -39,7 +39,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
     const debouncedSearchQuery = useDebounce(localSearchQuery, 500);
     const isMobile = useBreakpointValue({ base: true, lg: false });
 
-    // ✅ Fix: include filters + onFiltersChange in deps
+
     useEffect(() => {
         if (debouncedSearchQuery !== filters.searchQuery) {
             onFiltersChange({

@@ -52,8 +52,6 @@ const Shop: React.FC = () => {
         setError(null);
         const data = await fetchProducts();
         setProducts(data);
-
-        // Set initial price range based on actual product data
         if (data.length > 0) {
           const prices = data.map(p => p.price);
           const minPrice = Math.floor(Math.min(...prices));
@@ -80,24 +78,29 @@ const Shop: React.FC = () => {
         ...prev,
         categories: [location.state.category],
       }));
-      // clear state so it doesn't stick after reload
       navigate(location.pathname, { replace: true });
     }
   }, [location.state, navigate, location.pathname]);
 
-  // Get unique categories from products
+  // Get unique categories from products - Memoized properly
   const categories = useMemo(() => {
     const uniqueCategories = [...new Set(products.map(p => p.category))];
     return uniqueCategories.sort();
   }, [products]);
 
-  // Get price range from products
+  // Get price range from products - Memoized properly
   const priceRange: [number, number] = useMemo(() => {
     if (products.length === 0) return [0, 1000];
     const prices = products.map(p => p.price);
     return [Math.floor(Math.min(...prices)), Math.ceil(Math.max(...prices))];
   }, [products]);
 
+
+  const handleFiltersChange = useCallback((newFilters: FilterState) => {
+    setFilters(newFilters);
+  }, []);
+
+  //--------------------------Here is Filtering
   // Filter and sort products
   const filteredAndSortedProducts = useMemo(() => {
     let filtered = [...products];
@@ -146,34 +149,51 @@ const Shop: React.FC = () => {
         filtered.sort((a, b) => a.title.localeCompare(b.title));
         break;
       default:
-        filtered.sort((a, b) => a.id - b.id); // Default order
+        filtered.sort((a, b) => a.id - b.id); 
     }
 
     return filtered;
   }, [products, filters]);
 
-  // Pagination
-  const totalPages = Math.ceil(filteredAndSortedProducts.length / PRODUCTS_PER_PAGE);
-  const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
-  const endIndex = startIndex + PRODUCTS_PER_PAGE;
-  const currentProducts = filteredAndSortedProducts.slice(startIndex, endIndex);
+  // Pagination calculations - Memoized
+  const paginationData = useMemo(() => {
+    const totalPages = Math.ceil(filteredAndSortedProducts.length / PRODUCTS_PER_PAGE);
+    const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
+    const endIndex = startIndex + PRODUCTS_PER_PAGE;
+    const currentProducts = filteredAndSortedProducts.slice(startIndex, endIndex);
+    
+    return {
+      totalPages,
+      startIndex,
+      endIndex,
+      currentProducts
+    };
+  }, [filteredAndSortedProducts, currentPage]);
 
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
   }, [filters]);
 
-  const handleFiltersChange = useCallback((newFilters: FilterState) => {
-    setFilters(newFilters);
+  // Memoized pagination handlers
+  const handlePrevPage = useCallback(() => {
+    setCurrentPage(prev => Math.max(prev - 1, 1));
   }, []);
 
-  const handlePrevPage = () => {
-    setCurrentPage(prev => Math.max(prev - 1, 1));
-  };
+  const handleNextPage = useCallback(() => {
+    setCurrentPage(prev => Math.min(prev + 1, paginationData.totalPages));
+  }, [paginationData.totalPages]);
 
-  const handleNextPage = () => {
-    setCurrentPage(prev => Math.min(prev + 1, totalPages));
-  };
+  // Memoized clear filters handler
+  const handleClearFilters = useCallback(() => {
+    setFilters({
+      searchQuery: '',
+      categories: [],
+      priceRange: priceRange,
+      rating: 0,
+      sortBy: 'default',
+    });
+  }, [priceRange]);
 
   if (loading) {
     return (
@@ -273,7 +293,7 @@ const Shop: React.FC = () => {
                   </Text>
                   <HStack>
                     <Text fontSize="sm" color="gray.600">
-                      Showing {startIndex + 1}-{Math.min(endIndex, filteredAndSortedProducts.length)} of{' '}
+                      Showing {paginationData.startIndex + 1}-{Math.min(paginationData.endIndex, filteredAndSortedProducts.length)} of{' '}
                       {filteredAndSortedProducts.length} products
                     </Text>
                     {filteredAndSortedProducts.length !== products.length && (
@@ -294,7 +314,6 @@ const Shop: React.FC = () => {
                       priceRange={priceRange}
                     />
                   )}
-
 
                   {/* View Toggle */}
                   <HStack bg="white" borderRadius="md" p={1} shadow="sm">
@@ -320,8 +339,8 @@ const Shop: React.FC = () => {
                 </HStack>
               </Flex>
 
-              {/* Products Grid - Updated for larger cards with view button */}
-              {currentProducts.length > 0 ? (
+              {/* Products Grid */}
+              {paginationData.currentProducts.length > 0 ? (
                 <Grid
                   templateColumns={
                     viewMode === 'list'
@@ -333,9 +352,9 @@ const Shop: React.FC = () => {
                         xl: isMobile ? "repeat(3, 1fr)" : "repeat(3, 1fr)",
                       }
                   }
-                  gap={6} // Larger gap for bigger cards
+                  gap={6}
                 >
-                  {currentProducts.map((product) => (
+                  {paginationData.currentProducts.map((product) => (
                     <ProductCard key={product.id} product={product} />
                   ))}
                 </Grid>
@@ -356,13 +375,7 @@ const Shop: React.FC = () => {
                   <Button
                     colorPalette="blue"
                     variant="outline"
-                    onClick={() => setFilters({
-                      searchQuery: '',
-                      categories: [],
-                      priceRange: priceRange,
-                      rating: 0,
-                      sortBy: 'default',
-                    })}
+                    onClick={handleClearFilters}
                   >
                     Clear Filters
                   </Button>
@@ -370,7 +383,7 @@ const Shop: React.FC = () => {
               )}
 
               {/* Pagination */}
-              {totalPages > 1 && (
+              {paginationData.totalPages > 1 && (
                 <Flex justify="center" align="center" gap={4} mt={8}>
                   <Button
                     onClick={handlePrevPage}
@@ -388,14 +401,14 @@ const Shop: React.FC = () => {
                   </Button>
 
                   <HStack>
-                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    {Array.from({ length: Math.min(5, paginationData.totalPages) }, (_, i) => {
                       let pageNum;
-                      if (totalPages <= 5) {
+                      if (paginationData.totalPages <= 5) {
                         pageNum = i + 1;
                       } else if (currentPage <= 3) {
                         pageNum = i + 1;
-                      } else if (currentPage >= totalPages - 2) {
-                        pageNum = totalPages - 4 + i;
+                      } else if (currentPage >= paginationData.totalPages - 2) {
+                        pageNum = paginationData.totalPages - 4 + i;
                       } else {
                         pageNum = currentPage - 2 + i;
                       }
@@ -416,7 +429,7 @@ const Shop: React.FC = () => {
 
                   <Button
                     onClick={handleNextPage}
-                    disabled={currentPage === totalPages}
+                    disabled={currentPage === paginationData.totalPages}
                     variant="outline"
                     size="sm"
                     color="gray.500"

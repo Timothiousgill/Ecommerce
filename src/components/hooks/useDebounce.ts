@@ -1,32 +1,22 @@
 import { useEffect, useState } from 'react';
 
-export function useDebounce<T>(value: T, delay: number): T {
+export const useDebounce = <T>(value: T, delay = 500) => {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
 
   useEffect(() => {
-    const handler = setTimeout(() => {
+    const timeout = setTimeout(() => {
       setDebouncedValue(value);
     }, delay);
-    return () => {
-      clearTimeout(handler);
-    };
+
+    return () => clearTimeout(timeout);
   }, [value, delay]);
 
   return debouncedValue;
-}
+};
 
 
-export function useSearchDebounce(initialValue: string = '', delay: number = 500) {
-  const [searchValue, setSearchValue] = useState(initialValue);
-  const debouncedSearchValue = useDebounce(searchValue, delay);
 
-  const clearSearch = () => setSearchValue('');
 
-  return {
-    searchValue,
-    debouncedSearchValue,
-    setSearchValue,
-    clearSearch,
-    isSearching: searchValue !== debouncedSearchValue,
-  };
-}
+
+
+
