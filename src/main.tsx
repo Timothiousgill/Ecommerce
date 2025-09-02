@@ -32,8 +32,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<Checkout />} /> 
               <Route path="/profile" element={<Profile />} /> 
-              <Route path="/history" element={<OrderHistory />} /> {/* Add this route */}
-              <Route path="/settings" element={<Settings />} /> {/* Add this route */}
+              <Route path="/history" element={<OrderHistory />} />
+              <Route path="/settings" element={<Settings />} /> 
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
             </Routes>
