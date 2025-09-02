@@ -1,14 +1,8 @@
-// import { useState } from 'react'
-import './App.css'
-import Home from './pages/Home'
-// import { Button, HStack  } from '@chakra-ui/react'
+// App.tsx
+import Home from "./pages/Home";
 
 function App() {
-
-
-  return (
-    <Home />
-  )
+  return <Home />;
 }
 
-export default App
+export default App;
